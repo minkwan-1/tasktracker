@@ -12,7 +12,7 @@ import { getAllTasks } from "../store/taskSlice";
 
 const useAddTask = () => {
   const [task, setTask] = useState("");
-  const [time, setTime] = useState(3);
+  const [time, setTime] = useState(300);
   const tasks = useSelector((state) => state.tasks.tasks);
   const user = useSelector((state) => state?.user?.userInfo);
   const loading = useSelector((state) => state.tasks.loading);
@@ -34,7 +34,7 @@ const useAddTask = () => {
     dispatch(addTask(newTask));
     // 작업 입력 필드를 초기화
     setTask("");
-    setTime(3);
+    setTime(300);
   };
 
   useEffect(() => {
