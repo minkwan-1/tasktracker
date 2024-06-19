@@ -20,7 +20,7 @@ const useAddTask = () => {
   const navigate = useNavigate();
 
   console.log(user);
-  // 작업을 추가하는 함수
+
   const handleAddTask = () => {
     const newTask = {
       createdAt: Date.now(),

@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import { PageContainer } from "../layout/common";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-
 import { auth, storage } from "../firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import usePreventAuth from "../hooks/usePreventAuth";
-
 import {
   validateEmail,
   validatePassword,
@@ -17,14 +15,13 @@ import {
 const StyledContainer = styled.div`
   position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  height: 100vh;
+  align-items: center;
+  flex-direction: column;
+  min-height: 100vh;
   background: black;
   color: white;
   text-align: center;
-  overflow: hidden;
 `;
 
 const ContentWrapper = styled.div`

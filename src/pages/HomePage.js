@@ -13,7 +13,6 @@ const StyledContainer = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  height: 100vh;
   width: 100%;
   background: black;
   color: white;
@@ -21,28 +20,29 @@ const StyledContainer = styled.div`
 `;
 
 const ContentWrapper = styled.div`
+  position: relative;
   max-width: 1200px;
   width: 100%;
-  height: 100%;
-  position: relative;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding: 2rem;
   z-index: 1;
   @media (max-width: 900px) {
     flex-direction: column;
+    align-items: center;
   }
 `;
 
 const Title = styled.h1`
   font-size: 3rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   background: linear-gradient(45deg, #ffffff, #cccccc);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: fadeIn 1.5s ease-in-out;
-
+  z-index: 2;
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -56,7 +56,7 @@ const Title = styled.h1`
 const Input = styled.input`
   width: 300px;
   padding: 0.5rem;
-  margin: 0.5rem 0;
+  margin-bottom: 0.5rem;
   font-size: 1rem;
   border: 1px solid #cccccc;
   border-radius: 5px;
@@ -172,12 +172,17 @@ const InputArea = styled.div`
   justify-content: flex-start;
   align-items: center;
   height: 100%;
-  @media (max-width: 900px) {
-    order: 1;
-  }
+  padding: 1rem;
 `;
 
-const SecondArea = styled.div`
+const ButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+`;
+
+const TaskArea = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -185,23 +190,19 @@ const SecondArea = styled.div`
   align-items: center;
   height: 100%;
   overflow-y: auto;
-  @media (max-width: 900px) {
-    order: 2;
-  }
+  padding: 1rem;
 `;
 
 const EmptyTaskArea = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 400px;
-  min-width: 300px;
-  height: 100%;
+  min-width: 360px;
+  min-height: 100vh;
   border: 2px dashed #cccccc;
   border-radius: 10px;
-  margin: 3rem 0;
+  /* margin: 1rem 0; */
   cursor: pointer;
-  position: relative;
   opacity: 1;
   animation: fadeIn 1.5s ease forwards;
 
@@ -215,10 +216,6 @@ const EmptyTaskArea = styled.div`
       transform: translateY(0);
     }
   }
-
-  @media (max-width: 900px) {
-    width: 300px;
-  }
 `;
 
 const timeArray = [
@@ -230,30 +227,18 @@ const timeArray = [
 ];
 
 const HomePage = () => {
-  const {
-    task,
-    setTask,
-    time,
-    setTime,
-
-    handleAddTask,
-    tasks,
-    user,
-    loading,
-  } = useAddTask();
-
+  const { task, setTask, time, setTime, handleAddTask, tasks, user, loading } =
+    useAddTask();
   const navigate = useNavigate();
   const filteredTasks = tasks.filter((task) => task?.status !== "complete");
   usePreventAuth();
 
-  console.log(tasks);
-
   return (
     <PageContainer>
       <StyledContainer>
+        <Title>Add your Pomodoro</Title>
         <ContentWrapper>
           <InputArea>
-            <Title>Add your Pomodoro</Title>
             <Input
               type="text"
               value={task}
@@ -267,22 +252,24 @@ const HomePage = () => {
                 </option>
               ))}
             </Select>
-            <Button disabled={loading} onClick={handleAddTask}>
-              Add Task
-            </Button>
-
-            <Button onClick={() => navigate("/archive")}>Go to Archive</Button>
+            <ButtonContainer>
+              <Button disabled={loading} onClick={handleAddTask}>
+                Add Task
+              </Button>
+              <Button onClick={() => navigate("/archive")}>
+                Go to Archive
+              </Button>
+            </ButtonContainer>
           </InputArea>
-          {/* 주석 B */}
-          <SecondArea>
+          <TaskArea>
             {filteredTasks?.length === 0 ? (
-              <EmptyTaskArea>Not yet</EmptyTaskArea>
+              <EmptyTaskArea>No tasks yet</EmptyTaskArea>
             ) : (
               filteredTasks?.map((task) => (
                 <TaskCard key={task.id} task={task} userId={user?.uid} />
               ))
             )}
-          </SecondArea>
+          </TaskArea>
         </ContentWrapper>
         <GridOverlay />
       </StyledContainer>

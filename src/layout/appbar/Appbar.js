@@ -44,6 +44,12 @@ const Logo = styled.p`
   color: white;
 `;
 
+const DisplayName = styled.p`
+  @media (max-width: 400px) {
+    display: none;
+  }
+`;
+
 const Appbar = () => {
   const navigate = useNavigate();
   const userInfo = useSelector((state) => state?.user?.userInfo);
@@ -76,7 +82,9 @@ const Appbar = () => {
             gap: "10px",
           }}
         >
-          <p style={{ color: "white" }}>{userInfo?.displayName}</p>
+          <DisplayName style={{ color: "white" }}>
+            {userInfo?.displayName}
+          </DisplayName>
           {userInfo ? <LogOut onClick={handleSignOut}>⏎</LogOut> : <></>}
         </div>
       </HeaderContentWrapper>

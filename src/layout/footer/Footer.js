@@ -1,36 +1,33 @@
 import React from "react";
-import { styled } from "styled-components";
+import styled from "styled-components";
 
 const FooterStyle = styled.div`
-  background-color: black;
+  background-color: #111;
+  color: #fff;
+  padding: 40px 0;
 `;
 
 const FooterTextContainer = styled.div`
   max-width: 1200px;
   width: 100%;
   display: flex;
-  color: white;
   flex-direction: column;
   align-items: center;
   margin: 0 auto;
-  padding: 16px 0;
-  row-gap: 10px;
+`;
 
-  @media (max-width: 1200px) {
-    padding: 16px;
-  }
+const FooterText = styled.p`
+  font-size: 1rem;
+  text-align: center;
 `;
 
 const Footer = () => {
   return (
     <FooterStyle>
-      {/* Text */}
       <FooterTextContainer>
-        <p>My task</p>
-        <p>Copyright © 2023 All rights reserved</p>
-        <p>Powered By SITE123 - Create your own website</p>
+        <FooterText>🍅 TaskTracker</FooterText>
+        <FooterText>Copyright © 2024 All rights reserved</FooterText>
       </FooterTextContainer>
-      {/* Button */}
     </FooterStyle>
   );
 };

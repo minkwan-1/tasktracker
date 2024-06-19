@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
-import { ComponentWrapper, PageContainer } from "../layout/common";
 import usePreventAuth from "../hooks/usePreventAuth";
 
 const fadeIn = keyframes`
@@ -17,24 +16,23 @@ const fadeIn = keyframes`
 
 const StyledContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  min-height: 100vh;
   justify-content: center;
-  height: 100vh;
+  align-items: center;
+  flex-direction: column;
   background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
   color: white;
   text-align: center;
-  overflow: hidden;
-  min-width: 360px;
+  min-width: 100%;
 `;
 
 const ContentWrapper = styled.div`
   position: relative;
-  z-index: 1;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  z-index: 1;
   justify-content: center;
+  align-items: center;
+  flex-direction: column;
   animation: ${fadeIn} 1.5s ease-in-out;
 `;
 
@@ -45,11 +43,9 @@ const Title = styled.h1`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: ${fadeIn} 2s ease-in-out;
-
   @media (max-width: 768px) {
     font-size: 3rem;
   }
-
   @media (max-width: 360px) {
     font-size: 2.5rem;
   }
@@ -58,6 +54,7 @@ const Title = styled.h1`
 const Description = styled.p`
   font-size: 1.5rem;
   margin-bottom: 2rem;
+  padding: 0 20px;
   opacity: 0;
   animation: ${fadeIn} 2.5s ease forwards;
 
@@ -132,40 +129,6 @@ const GridOverlay = styled.div`
   animation: ${fadeIn} 4s ease-in-out;
 `;
 
-const Sparkles = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 150px;
-  height: 150px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  pointer-events: none;
-  animation: ${fadeIn} 2s ease-in-out infinite alternate;
-
-  &:before,
-  &:after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 150%;
-    height: 150%;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    pointer-events: none;
-    animation: ${fadeIn} 2s ease-in-out infinite alternate;
-  }
-
-  &:before {
-    transform: translate(-50%, -50%) scale(0.8);
-  }
-
-  &:after {
-    transform: translate(-50%, -50%) scale(0.6);
-  }
-`;
-
 const LandingPage = () => {
   usePreventAuth();
   const navigate = useNavigate();
@@ -175,14 +138,13 @@ const LandingPage = () => {
         <Title>Welcome to TaskTracker</Title>
         <Description>
           Start a timer for 25 minutes, focus on your task, and then archive
-          your focused content to track it. Scroll down for more info.
+          your focused content to track it. Join us today!
         </Description>
         <div>
           <Button onClick={() => navigate("/signin")}>Sign In</Button>
           <Button onClick={() => navigate("/signup")}>Sign Up</Button>
         </div>
       </ContentWrapper>
-      <Sparkles />
       <GridOverlay />
     </StyledContainer>
   );

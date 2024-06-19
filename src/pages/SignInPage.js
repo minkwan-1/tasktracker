@@ -11,14 +11,13 @@ import usePreventAuth from "../hooks/usePreventAuth";
 const StyledContainer = styled.div`
   position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  height: 100vh;
+  align-items: center;
+  flex-direction: column;
+  min-height: 100vh;
   background: black;
   color: white;
   text-align: center;
-  overflow: hidden;
 `;
 
 const ContentWrapper = styled.div`

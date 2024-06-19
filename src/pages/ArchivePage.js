@@ -4,15 +4,10 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { PageContainer } from "../layout/common";
 import usePreventAuth from "../hooks/usePreventAuth";
-import { Pie } from "react-chartjs-2";
-import { Chart, ArcElement, Tooltip } from "chart.js";
-
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { allClear } from "../store/taskSlice";
 import { useDispatch } from "react-redux";
-
-Chart.register(ArcElement, Tooltip);
 
 const GridOverlay = styled.div`
   position: absolute;
@@ -33,26 +28,24 @@ const StyledContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 120vh;
-  height: 120vh;
-  width: 100%;
+  min-height: 100vh;
+  min-width: 360px;
   background: black;
   color: white;
   text-align: center;
 `;
 
 const ContentWrapper = styled.div`
-  max-width: 1200px;
-  width: 100%;
-  height: 100%;
+  max-width: 800px;
+  padding: 0 20px;
+  margin: 2rem 0;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem; /* Adjust gap for spacing between TaskCards */
   z-index: 1;
   @media (max-width: 900px) {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 `;
 
@@ -63,6 +56,7 @@ const Title = styled.h1`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: fadeIn 1.5s ease-in-out;
+  z-index: 2;
 
   @keyframes fadeIn {
     from {
@@ -72,12 +66,49 @@ const Title = styled.h1`
       opacity: 1;
     }
   }
+  @media (max-width: 768px) {
+    font-size: 3rem;
+  }
+  @media (max-width: 360px) {
+    font-size: 2.5rem;
+  }
 `;
 
-const ChartContainer = styled.div`
-  width: 80%;
-  max-width: 600px;
-  margin-top: 2rem;
+const TaskCard = styled.div`
+  background: #333;
+  padding: 1rem;
+  border-radius: 10px;
+  text-align: left;
+  animation: fadeIn 1.5s ease forwards;
+  opacity: 0;
+  transform: translateY(20px);
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  span {
+    display: block;
+    font-size: 0.875rem;
+    color: #aaa;
+  }
 `;
 
 const Button = styled.button`
@@ -97,6 +128,7 @@ const Button = styled.button`
   cursor: pointer;
   opacity: 0;
   animation: fadeIn 1.5s ease forwards;
+  z-index: 2;
 
   @keyframes fadeIn {
     from {
@@ -121,10 +153,72 @@ const Button = styled.button`
   }
 `;
 
-const getRandomColor = () => {
-  return `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(
-    Math.random() * 256
-  )}, ${Math.floor(Math.random() * 256)}, 0.5)`;
+const quotes = [
+  "The only way to do great work is to love what you do. - Steve Jobs",
+  "Success is not the key to happiness. Happiness is the key to success. - Albert Schweitzer",
+  "Hardships often prepare ordinary people for an extraordinary destiny. - C.S. Lewis",
+  "The best time to plant a tree was 20 years ago. The second best time is now. - Chinese Proverb",
+  "It does not matter how slowly you go as long as you do not stop. - Confucius",
+  "You are never too old to set another goal or to dream a new dream. - C.S. Lewis",
+  "You miss 100% of the shots you don’t take. - Wayne Gretzky",
+  "I have not failed. I've just found 10,000 ways that won't work. - Thomas Edison",
+  "Believe you can and you're halfway there. - Theodore Roosevelt",
+  "The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt",
+  "Life is what happens when you're busy making other plans. - John Lennon",
+  "In three words I can sum up everything I've learned about life: it goes on. - Robert Frost",
+  "The only limit to our realization of tomorrow will be our doubts of today. - Franklin D. Roosevelt",
+  "It is never too late to be what you might have been. - George Eliot",
+  "The journey of a thousand miles begins with one step. - Lao Tzu",
+  "The harder I work, the luckier I get. - Samuel Goldwyn",
+  "The way to get started is to quit talking and begin doing. - Walt Disney",
+  "Your time is limited, so don't waste it living someone else's life. - Steve Jobs",
+  "If you want to lift yourself up, lift up someone else. - Booker T. Washington",
+  "Do not wait to strike till the iron is hot, but make it hot by striking. - William Butler Yeats",
+  "The only person you are destined to become is the person you decide to be. - Ralph Waldo Emerson",
+  "Don't watch the clock; do what it does. Keep going. - Sam Levenson",
+  "Success usually comes to those who are too busy to be looking for it. - Henry David Thoreau",
+  "The best revenge is massive success. - Frank Sinatra",
+  "Don't cry because it's over, smile because it happened. - Dr. Seuss",
+  "I find that the harder I work, the more luck I seem to have. - Thomas Jefferson",
+  "You must be the change you wish to see in the world. - Mahatma Gandhi",
+  "A champion is defined not by their wins but by how they can recover when they fall. - Serena Williams",
+  "If you can dream it, you can achieve it. - Zig Ziglar",
+  "Do what you can, with what you have, where you are. - Theodore Roosevelt",
+  "Strive not to be a success, but rather to be of value. - Albert Einstein",
+  "The starting point of all achievement is desire. - Napoleon Hill",
+  "Success is not final, failure is not fatal: It is the courage to continue that counts. - Winston Churchill",
+  "It always seems impossible until it is done. - Nelson Mandela",
+  "The only limit to our realization of tomorrow will be our doubts of today. - Franklin D. Roosevelt",
+  "You don't have to be great to start, but you have to start to be great. - Zig Ziglar",
+  "Believe you can and you're halfway there. - Theodore Roosevelt",
+  "Life is what happens when you're busy making other plans. - John Lennon",
+  "In three words I can sum up everything I've learned about life: it goes on. - Robert Frost",
+  "The only limit to our realization of tomorrow will be our doubts of today. - Franklin D. Roosevelt",
+  "It is never too late to be what you might have been. - George Eliot",
+  "The journey of a thousand miles begins with one step. - Lao Tzu",
+  "The harder I work, the luckier I get. - Samuel Goldwyn",
+  "The way to get started is to quit talking and begin doing. - Walt Disney",
+  "Your time is limited, so don't waste it living someone else's life. - Steve Jobs",
+  "If you want to lift yourself up, lift up someone else. - Booker T. Washington",
+  "Do not wait to strike till the iron is hot, but make it hot by striking. - William Butler Yeats",
+  "The only person you are destined to become is the person you decide to be. - Ralph Waldo Emerson",
+  "Don't watch the clock; do what it does. Keep going. - Sam Levenson",
+  "Success usually comes to those who are too busy to be looking for it. - Henry David Thoreau",
+  "The best revenge is massive success. - Frank Sinatra",
+  "Don't cry because it's over, smile because it happened. - Dr. Seuss",
+  "I find that the harder I work, the more luck I seem to have. - Thomas Jefferson",
+  "You must be the change you wish to see in the world. - Mahatma Gandhi",
+  "A champion is defined not by their wins but by how they can recover when they fall. - Serena Williams",
+  "If you can dream it, you can achieve it. - Zig Ziglar",
+  "Do what you can, with what you have, where you are. - Theodore Roosevelt",
+  "Strive not to be a success, but rather to be of value. - Albert Einstein",
+  "The starting point of all achievement is desire. - Napoleon Hill",
+  "Success is not final, failure is not fatal: It is the courage to continue that counts. - Winston Churchill",
+  "It always seems impossible until it is done. - Nelson Mandela",
+];
+
+const getRandomQuote = () => {
+  return quotes[Math.floor(Math.random() * quotes.length)];
 };
 
 const ArchivePage = () => {
@@ -134,58 +228,21 @@ const ArchivePage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   usePreventAuth();
-  // 컴포넌트가 렌더링될 때마다 실행되는 효과
+
   useEffect(() => {
-    // 작업을 가져오는 함수
     const fetchTasks = async () => {
-      // firestore에서 작업 컬렉션의 문서를 가져옴
       const taskCollection = await getDocs(collection(db, "tasks"));
       const userTasks = taskCollection.docs
-        // 문서 데이터를 가져와서 객체로 변환
         .map((doc) => doc.data())
-        // 사용자 ID와 일치하는 작업만 필터링
         .filter((task) => task.userId === user.uid)
         .filter((task) => task.status === "complete");
 
-      // 가져온 작업을 상태에 저장
       setSavedTasks(userTasks);
     };
-    // 사용자가 있을 경우 작업을 가져오는 함수를 호출
     if (user) {
       fetchTasks();
     }
   }, [user]);
-
-  const chartData = {
-    labels: [],
-    datasets: [
-      {
-        label: "Tasks",
-        data: [],
-        backgroundColor: [],
-      },
-    ],
-  };
-
-  // 저장된 작업 목록을 순회
-  savedTasks.forEach((task) => {
-    // 작업의 카테고리를 가져옴(이때, 카테고리는 작업의 이름 그 자체)
-    const category = task.task;
-    // 차트 데이터의 라벨에 카테고리가 없는 경우(즉, 새로운 작업이 추가되었을 때)
-    if (!chartData.labels.includes(category)) {
-      // 라벨에 카테고리를 추가
-      chartData.labels.push(category);
-      // 데이터셋에 카테고리에 해당하는 데이터를 추가하고 1로 초기화
-      chartData.datasets[0].data.push(1);
-      // 해당 데이터셋의 배경색을 임의적으로 설정
-      chartData.datasets[0].backgroundColor.push(getRandomColor());
-    } else {
-      // 차트 데이터의 라벨에 이미 카테고리가 있는 경우(=동일한 제목의 작업이 추가된 경우)
-      // 카테고리의 인덱스를 찾고, 해당 카테고리의 데이터 값을 증가시킴
-      const index = chartData.labels.indexOf(category);
-      chartData.datasets[0].data[index]++;
-    }
-  });
 
   const handleGoHome = () => {
     navigate("/home");
@@ -194,50 +251,42 @@ const ArchivePage = () => {
   return (
     <PageContainer>
       <StyledContainer>
-        <ContentWrapper>
-          <Title>
-            Hi! {user?.displayName}
-            {savedTasks.length === 0
-              ? ", Please complete your tasks!"
-              : "! These are Your Achievements"}
-          </Title>
+        <Title>
+          Hi! {user?.displayName}
+          {savedTasks.length === 0
+            ? ", Please complete your tasks!"
+            : "! These are Your Achievements"}
+        </Title>
 
+        <ContentWrapper>
           {savedTasks.length === 0 ? (
-            <>
-              <Button onClick={handleGoHome}>Go Home</Button>
-            </>
+            <Button onClick={handleGoHome}>Go Home</Button>
           ) : (
-            <>
-              <ChartContainer>
-                <Pie
-                  width={20}
-                  height={20}
-                  data={chartData}
-                  options={{
-                    plugins: {
-                      tooltip: {
-                        callbacks: {
-                          label: function (context) {
-                            const label = context.label || "";
-                            if (label) {
-                              const value = context.parsed || 0;
-                              return `${label}: ${value}`;
-                            }
-                            return null;
-                          },
-                        },
-                      },
-                    },
-                  }}
-                />
-              </ChartContainer>
-              <Button onClick={() => dispatch(allClear(user?.uid))}>
-                All Clear
-              </Button>
-              <Button onClick={handleGoHome}>Go Home</Button>
-            </>
+            savedTasks.map((task, index) => (
+              <TaskCard key={index}>
+                <h2>{task.task}</h2>
+                <p>{task.description}</p>
+                <span>{getRandomQuote()}</span>
+              </TaskCard>
+            ))
           )}
         </ContentWrapper>
+
+        {savedTasks.length > 0 && (
+          <>
+            <Button
+              onClick={() => {
+                dispatch(allClear(user?.uid));
+                window.alert("All saved items have been deleted 😄");
+                navigate("/home");
+              }}
+            >
+              All Clear
+            </Button>
+            <Button onClick={handleGoHome}>Go Home</Button>
+          </>
+        )}
+
         <GridOverlay />
       </StyledContainer>
     </PageContainer>

@@ -15,7 +15,7 @@ const StyledCard = styled.div`
   box-shadow: 0px 4px 15px rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease-in-out;
   cursor: pointer;
-  margin: 30px 0px;
+  margin-bottom: 30px;
   opacity: 0;
   animation: fadeIn 1.5s ease forwards;
   display: flex;
