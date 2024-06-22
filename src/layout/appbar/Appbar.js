@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { styled } from "styled-components";
 import { useSelector } from "react-redux";
-import { setUser, clearUser } from "../../store/userSlice";
+import { checkLoginUser, clearUser } from "../../store/userSlice";
 import { useDispatch } from "react-redux";
 import { auth } from "../../firebase";
 
@@ -57,7 +57,7 @@ const Appbar = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(setUser(JSON.parse(localStorage.getItem("user"))));
+    dispatch(checkLoginUser(JSON.parse(localStorage.getItem("user"))));
   }, [dispatch]);
 
   const handleSignOut = () => {

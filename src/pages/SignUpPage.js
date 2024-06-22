@@ -2,15 +2,16 @@ import React, { useState } from "react";
 import { PageContainer } from "../layout/common";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { auth, storage } from "../firebase";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+
 import usePreventAuth from "../hooks/usePreventAuth";
 import {
   validateEmail,
   validatePassword,
   validateUsername,
 } from "../utils/validation";
+import { useSelector } from "react-redux";
+import { signupUser } from "../store/userSlice";
+import { useDispatch } from "react-redux";
 
 const StyledContainer = styled.div`
   position: relative;
@@ -120,6 +121,9 @@ const Button = styled.button`
     transform: translateY(0);
     box-shadow: 0px 4px 15px rgba(255, 255, 255, 0.2);
   }
+  &:disabled {
+    background-color: gray;
+  }
 `;
 
 const GridOverlay = styled.div`
@@ -188,6 +192,9 @@ const SignUpPage = () => {
   const [prevImg, setPrevImgFile] = useState("");
   const [imgFile, setImageFile] = useState("");
   const [errors, setErrors] = useState({});
+  const loading = useSelector((state) => state?.user?.loading);
+  const dispatch = useDispatch();
+  console.log(loading);
   usePreventAuth();
 
   const navigate = useNavigate();
@@ -255,89 +262,104 @@ const SignUpPage = () => {
       alert("Please check your information again.");
       return;
     }
+    const result = await dispatch(
+      signupUser({
+        email: userInfo?.email,
+        password: userInfo?.password,
+        imgFile,
+        displayName: userInfo?.username,
+      })
+    ).unwrap();
 
-    try {
-      // Firebase를 통해, 이메일과 비밀번호로 사용자를 생성
-      await createUserWithEmailAndPassword(
-        auth,
-        userInfo?.email,
-        userInfo?.password
-      );
+    console.log(result);
+    alert("Sign up successful!");
+    navigate("/signin");
+    // try {
+    //   // Firebase를 통해, 이메일과 비밀번호로 사용자를 생성
+    //   await createUserWithEmailAndPassword(
+    //     auth,
+    //     userInfo?.email,
+    //     userInfo?.password
+    //   );
 
-      // 현재 사용자가 있는 경우(=firebase에 회원 등록이 된 경우)
-      if (auth.currentUser) {
-        // 동시에 이미지 파일이 있는 경우
-        if (imgFile) {
-          // firebase에 이미지를 업로드
-          const storageRef = ref(storage, new Date().getTime() + imgFile?.name);
-          const uploadTask = uploadBytesResumable(storageRef, imgFile);
-          uploadTask.on(
-            "state_changed",
-            // 업로드 상태가 변경될 때 실행될 콜백 함수
-            (snapshot) => {
-              // 업로드 진행률을 계산하는 로직
-              const progress =
-                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              console.log("Upload is " + progress + "% done");
-              switch (snapshot.state) {
-                case "paused":
-                  console.log("Upload is paused");
-                  break;
-                case "running":
-                  console.log("Upload is running");
-                  break;
-              }
-            },
-            // 업로드 중 에러가 발생한 경우
-            (error) => {
-              alert("Failed to upload image. Please try again later.");
-              navigate("/signin");
-            },
-            // 업로드가 완료된 경우
-            () => {
-              // 업로드된 파일의 다운로드 URL을 가져옴
-              getDownloadURL(uploadTask.snapshot.ref).then(
-                async (downloadURL) => {
-                  // 사용자 프로필을 업데이트
-                  await updateProfile(auth.currentUser, {
-                    displayName: userInfo?.username,
-                    photoURL: downloadURL,
-                  });
-                  alert("Sign up successful!");
-                  navigate("/signin");
-                }
-              );
-            }
-          );
-        }
-        // 이미지 파일이 없는 경우
-        else {
-          alert("Sign up successful!");
-          navigate("/signin");
-        }
-      }
-    } catch (error) {
-      // 예외가 발생한 경우
-      switch (error.code) {
-        case "auth/email-already-in-use":
-          alert("Email already in use.");
-          break;
-        case "auth/weak-password":
-          alert("Password should be at least 6 characters.");
-          break;
-        case "auth/network-request-failed":
-          alert("Network request failed.");
-          break;
-        case "auth/invalid-email":
-          alert("Invalid email format.");
-          break;
-        case "auth/internal-error":
-          alert("Internal error.");
-          break;
-        default:
-          alert("Sign up failed.");
-      }
-    }
+    //   // 현재 사용자가 있는 경우(=firebase에 회원 등록이 된 경우)
+    //   if (auth.currentUser) {
+    //     // 동시에 이미지 파일이 있는 경우
+    //     if (imgFile) {
+    //       // firebase에 이미지를 업로드
+    //       const storageRef = ref(storage, new Date().getTime() + imgFile?.name);
+    //       const uploadTask = uploadBytesResumable(storageRef, imgFile);
+    //       uploadTask.on(
+    //         "state_changed",
+    //         // 업로드 상태가 변경될 때 실행될 콜백 함수
+    //         (snapshot) => {
+    //           // 업로드 진행률을 계산하는 로직
+    //           const progress =
+    //             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+    //           console.log("Upload is " + progress + "% done");
+    //           switch (snapshot.state) {
+    //             case "paused":
+    //               console.log("Upload is paused");
+    //               break;
+    //             case "running":
+    //               console.log("Upload is running");
+    //               break;
+    //           }
+    //         },
+    //         // 업로드 중 에러가 발생한 경우
+    //         (error) => {
+    //           alert("Failed to upload image. Please try again later.");
+    //           navigate("/signin");
+    //         },
+    //         // 업로드가 완료된 경우
+    //         () => {
+    //           // 업로드된 파일의 다운로드 URL을 가져옴
+    //           getDownloadURL(uploadTask.snapshot.ref).then(
+    //             async (downloadURL) => {
+    //               // 사용자 프로필을 업데이트
+    //               await updateProfile(auth.currentUser, {
+    //                 displayName: userInfo?.username,
+    //                 photoURL: downloadURL,
+    //               });
+    //               alert("Sign up successful!");
+    //               navigate("/signin");
+    //             }
+    //           );
+    //         }
+    //       );
+    //     }
+    //     // 이미지 파일이 없는 경우
+    //     else {
+    //       await updateProfile(auth.currentUser, {
+    //         displayName: userInfo?.username,
+    //         photoURL: "",
+    //       });
+    //       alert("Sign up successful!");
+    //       navigate("/signin");
+    //     }
+    //   }
+    // } catch (error) {
+    //   // 예외가 발생한 경우
+    //   switch (error.code) {
+    //     case "auth/email-already-in-use":
+    //       alert("Email already in use.");
+    //       break;
+    //     case "auth/weak-password":
+    //       alert("Password should be at least 6 characters.");
+    //       break;
+    //     case "auth/network-request-failed":
+    //       alert("Network request failed.");
+    //       break;
+    //     case "auth/invalid-email":
+    //       alert("Invalid email format.");
+    //       break;
+    //     case "auth/internal-error":
+    //       alert("Internal error.");
+    //       break;
+    //     default:
+    //       alert("Sign up failed.");
+    //   }
+    // }
   };
 
   return (
@@ -386,7 +408,9 @@ const SignUpPage = () => {
             error={errors.password}
           />
           {errors.password && <ErrorMessage>{errors.password}</ErrorMessage>}{" "}
-          <Button onClick={handleSignUp}>Create account</Button>
+          <Button disabled={loading} onClick={handleSignUp}>
+            Create account
+          </Button>
         </ContentWrapper>
         <GridOverlay />
       </StyledContainer>

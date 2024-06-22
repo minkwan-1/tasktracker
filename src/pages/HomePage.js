@@ -9,11 +9,12 @@ import usePreventAuth from "../hooks/usePreventAuth";
 const StyledContainer = styled.div`
   position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   min-height: 100vh;
-  width: 100%;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  max-width: 100%;
+  min-width: 100%;
   background: black;
   color: white;
   text-align: center;
@@ -27,7 +28,7 @@ const ContentWrapper = styled.div`
   flex-direction: row;
   align-items: flex-start;
   justify-content: center;
-  padding: 2rem;
+  /* padding: 2rem; */
   z-index: 1;
   @media (max-width: 900px) {
     flex-direction: column;
@@ -150,6 +151,9 @@ const Button = styled.button`
     transform: translateY(0);
     box-shadow: 0px 4px 15px rgba(255, 255, 255, 0.2);
   }
+  &:disabled {
+    background-color: red;
+  }
 `;
 
 const GridOverlay = styled.div`
@@ -233,6 +237,7 @@ const HomePage = () => {
   const filteredTasks = tasks.filter((task) => task?.status !== "complete");
   usePreventAuth();
 
+  console.log(loading);
   return (
     <PageContainer>
       <StyledContainer>

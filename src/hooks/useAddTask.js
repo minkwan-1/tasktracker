@@ -22,6 +22,9 @@ const useAddTask = () => {
   console.log(user);
 
   const handleAddTask = () => {
+    if (!task.trim()) {
+      return alert("태스크를 입력해주세요.");
+    }
     const newTask = {
       createdAt: Date.now(),
       task,

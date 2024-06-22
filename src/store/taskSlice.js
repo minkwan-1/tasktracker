@@ -156,9 +156,7 @@ const tasksSlice = createSlice({
     });
     builder.addCase(allClear.fulfilled, (state, action) => {
       state.loading = false;
-      state.tasks = state.tasks.filter(
-        (task) => !action.payload.includes(task.id)
-      );
+      state.tasks = state.tasks.filter((task) => !action.payload.some(task.id));
       // window.alert("All saved items have been deleted 😄");
     });
     builder.addCase(allClear.rejected, (state) => {

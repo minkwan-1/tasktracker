@@ -224,25 +224,26 @@ const getRandomQuote = () => {
 const ArchivePage = () => {
   const [savedTasks, setSavedTasks] = useState([]);
   const user = useSelector((state) => state?.user?.userInfo);
-
+  const tasks = useSelector((state) => state?.tasks?.tasks);
+  const filteredTasks = tasks.filter((elem) => elem?.status === "complete");
   const navigate = useNavigate();
   const dispatch = useDispatch();
   usePreventAuth();
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      const taskCollection = await getDocs(collection(db, "tasks"));
-      const userTasks = taskCollection.docs
-        .map((doc) => doc.data())
-        .filter((task) => task.userId === user.uid)
-        .filter((task) => task.status === "complete");
+  // useEffect(() => {
+  //   const fetchTasks = async () => {
+  //     const taskCollection = await getDocs(collection(db, "tasks"));
+  //     const userTasks = taskCollection.docs
+  //       .map((doc) => doc.data())
+  //       .filter((task) => task.userId === user.uid)
+  //       .filter((task) => task.status === "complete");
 
-      setSavedTasks(userTasks);
-    };
-    if (user) {
-      fetchTasks();
-    }
-  }, [user]);
+  //     setSavedTasks(userTasks);
+  //   };
+  //   if (user) {
+  //     fetchTasks();
+  //   }
+  // }, [user]);
 
   const handleGoHome = () => {
     navigate("/home");
@@ -253,16 +254,16 @@ const ArchivePage = () => {
       <StyledContainer>
         <Title>
           Hi! {user?.displayName}
-          {savedTasks.length === 0
+          {filteredTasks?.length === 0
             ? ", Please complete your tasks!"
             : "! These are Your Achievements"}
         </Title>
 
         <ContentWrapper>
-          {savedTasks.length === 0 ? (
+          {filteredTasks?.length === 0 ? (
             <Button onClick={handleGoHome}>Go Home</Button>
           ) : (
-            savedTasks.map((task, index) => (
+            filteredTasks?.map((task, index) => (
               <TaskCard key={index}>
                 <h2>{task.task}</h2>
                 <p>{task.description}</p>
@@ -272,7 +273,7 @@ const ArchivePage = () => {
           )}
         </ContentWrapper>
 
-        {savedTasks.length > 0 && (
+        {filteredTasks?.length > 0 && (
           <>
             <Button
               onClick={() => {

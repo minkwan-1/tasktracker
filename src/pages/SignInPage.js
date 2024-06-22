@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { setUser } from "../store/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { checkLoginUser, signInUser } from "../store/userSlice";
 import styled from "styled-components";
 import { PageContainer } from "../layout/common";
 import { auth } from "../firebase";
@@ -115,6 +115,9 @@ const Button = styled.button`
     transform: translateY(0);
     box-shadow: 0px 4px 15px rgba(255, 255, 255, 0.2);
   }
+  &:disabled {
+    background-color: gray;
+  }
 `;
 
 const GridOverlay = styled.div`
@@ -134,6 +137,7 @@ const SignInPage = () => {
   const [signinInfo, setSigninInfo] = useState({ email: "", password: "" });
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const loading = useSelector((state) => state?.user?.loading);
   usePreventAuth();
 
   const handleChange = (e) => {
@@ -148,22 +152,19 @@ const SignInPage = () => {
   const handleSignIn = async () => {
     // firebase를 통해, 이메일과 비밀번호로 로그인
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        signinInfo?.email,
-        signinInfo?.password
-      );
+      // const userCredential = await signInWithEmailAndPassword(
+      //   auth,
+      //   signinInfo?.email,
+      //   signinInfo?.password
+      // );
       // 로그인 한 사용자 정보를 가져옴
-      const user = userCredential?.user;
+      // const user = userCredential?.user;
       // 사용자 정보를 직렬화
-      const serializedUser = {
-        uid: user.uid,
-        displayName: user.displayName,
-        email: user.email,
-      };
+      await dispatch(
+        signInUser({ email: signinInfo?.email, password: signinInfo?.password })
+      ).unwrap();
+
       navigate("/home");
-      // 사용자 정보를 redux 상태에 저장
-      dispatch(setUser(serializedUser));
     } catch (error) {
       // 예외가 발생한 경우, 해당 에러를 콘솔에 출력
       console.error(error);
@@ -189,7 +190,9 @@ const SignInPage = () => {
             onChange={handleChange}
             placeholder="Password"
           />
-          <Button onClick={handleSignIn}>Sign In</Button>
+          <Button disabled={loading} onClick={handleSignIn}>
+            Sign In
+          </Button>
         </ContentWrapper>
         <GridOverlay />
       </StyledContainer>
