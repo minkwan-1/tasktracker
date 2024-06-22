@@ -88,7 +88,6 @@ export const signupUser = createAsyncThunk(
             // 업로드 중 에러가 발생한 경우
             (error) => {
               alert("Failed to upload image. Please try again later.");
-              navigate("/signin");
             },
             // 업로드가 완료된 경우
             () => {
